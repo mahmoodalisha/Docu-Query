@@ -16,13 +16,13 @@ const FileUpload = ({ onFileUpload }) => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://localhost:5000/upload', formData, {
+      const response = await axios.post('/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
       onFileUpload(response.data);
-      setFileUrl(`http://localhost:5000/files/${response.data.pdfId}`); 
+      setFileUrl(`/files/${response.data.pdfId}`); 
     } catch (error) {
       console.error('File upload error:', error);
     }
