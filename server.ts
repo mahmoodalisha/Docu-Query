@@ -35,11 +35,7 @@ app.use(cors({ origin: '*' }));
 
 app.use('/files', express.static(path.join(__dirname, 'uploads')));
 
-// Add Cache-Control middleware
-app.use((req, res, next) => {
-  res.set('Cache-Control', 'no-store');
-  next();
-});
+
 
 // Serve static files from frontend build
 app.use(express.static(path.resolve(__dirname, 'frontend', 'build')));
