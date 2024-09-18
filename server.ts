@@ -7,6 +7,8 @@ const pdf = require('pdf-parse');
 const { CohereClient } = require('cohere-ai');
 const cors = require('cors');
 
+console.log('Cohere API Key:', process.env.COHERE_API_KEY);
+
 const app = express();
 const port = 5000;
 
