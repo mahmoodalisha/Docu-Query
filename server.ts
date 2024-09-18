@@ -15,6 +15,13 @@ const upload = multer({ dest: 'uploads/' });
 app.use(express.json());
 app.use(cors());
 
+// Add Cache-Control middleware
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
+
+
 app.use(express.static(path.resolve(__dirname, 'frontend', 'build')))
 
 app.get("/test",(req,res)=>{
