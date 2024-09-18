@@ -7,11 +7,8 @@ const pdf = require('pdf-parse');
 const { CohereClient } = require('cohere-ai');
 const cors = require('cors');
 
-
 const app = express();
 const port = 5000;
-
-const upload = multer({ dest: 'uploads/' });
 
 app.use(express.json());
 app.use(cors());
@@ -22,26 +19,50 @@ app.use((req, res, next) => {
   next();
 });
 
+// Serve static files from frontend build
+app.use(express.static(path.resolve(__dirname, 'frontend', 'build')));
 
-app.use(express.static(path.resolve(__dirname, 'frontend', 'build')))
-
-app.get("/test",(req,res)=>{
-    res.send("Express app is running")
-})
+// Test route
+app.get("/test", (req, res) => {
+  res.send("Express app is running");
+});
 
 // Initialize Cohere Client
 const cohere = new CohereClient({
   token: process.env.COHERE_API_KEY,
 });
 
+// Multer storage configuration
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // Append timestamp to avoid collisions
+  },
+});
+
+const upload = multer({ storage });
+
+// File upload route
 app.post('/upload', upload.single('file'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
+
   const pdfPath = path.join(__dirname, 'uploads', req.file.filename);
-  res.json({ pdfId: req.file.filename });
+  
+  fs.stat(pdfPath, (err, stats) => {
+    if (err) {
+      console.error('File save error:', err);
+      return res.status(500).json({ error: 'Failed to save file' });
+    }
+    
+    res.json({ pdfId: req.file.filename });
+  });
 });
 
+// Query Cohere API with PDF content
 app.post('/ask', async (req, res) => {
   const { pdfId, question } = req.body;
   const pdfPath = path.join(__dirname, 'uploads', pdfId);
@@ -69,7 +90,7 @@ app.post('/ask', async (req, res) => {
   }
 });
 
-
+// Serve uploaded files
 app.get('/files/:filename', (req, res) => {
   const { filename } = req.params;
   const filePath = path.join(__dirname, 'uploads', filename);
@@ -81,28 +102,23 @@ app.get('/files/:filename', (req, res) => {
   }
 });
 
-
-
-// Backend GET route
-// app.get('/candidate/38', (req, res).....
-
-// Looking for routes in frontend
-app.get('*', (req, res)=>{
-  try{
+// Frontend routing (catch-all for frontend paths)
+app.get('*', (req, res) => {
+  try {
     res.sendFile(
       path.resolve(__dirname, 'frontend', 'build', 'index.html'),
-      function (err) {
-          if (err) {
-              res.status(500).send(err)
-          }
+      (err) => {
+        if (err) {
+          res.status(500).send(err);
+        }
       }
-  )
-  }catch(err){
-    res.status(500).send(err)
+    );
+  } catch (err) {
+    res.status(500).send(err);
   }
-}) // "/", "/login", "/register", "/home/score/3/edit/...."
+});
 
-
+// Start server
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
