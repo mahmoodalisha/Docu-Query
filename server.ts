@@ -7,29 +7,8 @@ const pdf = require('pdf-parse');
 const { CohereClient } = require('cohere-ai');
 const cors = require('cors');
 
-console.log('Cohere API Key:', process.env.COHERE_API_KEY);
-
 const app = express();
 const port = 5000;
-
-app.use(express.json());
-app.use(cors({ origin: '*' }));
-
-app.use('/files', express.static(path.join(__dirname, 'uploads')));
-
-// Add Cache-Control middleware
-app.use((req, res, next) => {
-  res.set('Cache-Control', 'no-store');
-  next();
-});
-
-// Serve static files from frontend build
-app.use(express.static(path.resolve(__dirname, 'frontend', 'build')));
-
-// Test route
-app.get("/test", (req, res) => {
-  res.send("Express app is running");
-});
 
 // Initialize Cohere Client
 const cohere = new CohereClient({
@@ -46,10 +25,33 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: { fileSize: 40 * 1024 * 1024 } // 40 MB limit
+});
+
+app.use(express.json());
+app.use(cors({ origin: '*' }));
+
+app.use('/files', express.static(path.join(__dirname, 'uploads')));
+
+// Add Cache-Control middleware
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
+
+// Serve static files from frontend build
+app.use(express.static(path.resolve(__dirname, 'frontend', 'build')));
+
+// Test route
+app.get('/test', (req, res) => {
+  res.send('Express app is running');
+});
 
 // File upload route
 app.post('/upload', upload.single('file'), (req, res) => {
+  console.log('File upload request received');
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
@@ -61,7 +63,7 @@ app.post('/upload', upload.single('file'), (req, res) => {
       console.error('File save error:', err);
       return res.status(500).json({ error: 'Failed to save file' });
     }
-    
+    console.log('File saved successfully');
     res.json({ pdfId: req.file.filename });
   });
 });
@@ -108,18 +110,15 @@ app.get('/files/:filename', (req, res) => {
 
 // Frontend routing (catch-all for frontend paths)
 app.get('*', (req, res) => {
-  try {
-    res.sendFile(
-      path.resolve(__dirname, 'frontend', 'build', 'index.html'),
-      (err) => {
-        if (err) {
-          res.status(500).send(err);
-        }
+  res.sendFile(
+    path.resolve(__dirname, 'frontend', 'build', 'index.html'),
+    (err) => {
+      if (err) {
+        console.error('Error serving index.html:', err);
+        res.status(500).send('Error serving index.html');
       }
-    );
-  } catch (err) {
-    res.status(500).send(err);
-  }
+    }
+  );
 });
 
 // Start server
