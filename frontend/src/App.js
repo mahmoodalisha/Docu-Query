@@ -5,19 +5,18 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 
 const App = () => {
-  const [pdfId, setPdfId] = useState(null);
+  const [pdfUrl, setPdfUrl] = useState(null);
 
   const handleFileUpload = (data) => {
-    setPdfId(data.pdfId); 
+    setPdfUrl(data.pdfUrl);
   };
 
   return (
     <div>
-      
       <Navbar />
       <Hero />
       <FileUpload onFileUpload={handleFileUpload} />
-      {pdfId && <Chatbot pdfId={pdfId} />}
+      {pdfUrl && <Chatbot pdfUrl={pdfUrl} />}
     </div>
   );
 };

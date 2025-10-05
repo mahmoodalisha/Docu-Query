@@ -16,13 +16,14 @@ const FileUpload = ({ onFileUpload }) => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      const response = await axios.post('http://localhost:5000/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-      onFileUpload(response.data);
-      setFileUrl(`/files/${response.data.pdfId}`); 
+
+      
+      const { pdfUrl } = response.data;
+      onFileUpload({ pdfUrl });
+      setFileUrl(pdfUrl);
     } catch (error) {
       console.error('File upload error:', error);
     }
@@ -40,10 +41,14 @@ const FileUpload = ({ onFileUpload }) => {
           onChange={handleFileChange}
         />
       </label>
-      <button className="upload-button" onClick={handleFileUpload}>Upload</button>
+      <button className="upload-button" onClick={handleFileUpload}>
+        Upload
+      </button>
       {fileUrl && (
         <div className="view-link">
-          <a href={fileUrl} target="_blank" rel="noopener noreferrer">View PDF</a>
+          <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+            View PDF
+          </a>
         </div>
       )}
     </div>
