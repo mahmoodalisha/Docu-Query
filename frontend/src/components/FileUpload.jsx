@@ -5,6 +5,7 @@ import './FileUpload.css';
 const FileUpload = ({ onFileUpload }) => {
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState('');
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -16,7 +17,7 @@ const FileUpload = ({ onFileUpload }) => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://localhost:5000/upload', formData, {
+      const response = await axios.post(`${API_BASE_URL}/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
