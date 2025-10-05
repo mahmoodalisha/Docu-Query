@@ -5,7 +5,7 @@ import './FileUpload.css';
 const FileUpload = ({ onFileUpload }) => {
   const [file, setFile] = useState(null);
   const [fileUrl, setFileUrl] = useState('');
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const API_BASE_URL = process.env.REACT_APP_API_URL;
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);

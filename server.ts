@@ -10,7 +10,7 @@ const path = require('path');
 const axios = require('axios');
 
 const app = express();
-const port = process.env.PORT || 5000;
+
 
 
 cloudinary.config({
@@ -76,5 +76,5 @@ app.post('/ask', async (req, res) => {
     res.status(500).send('Error processing the query');
   }
 });
-
+const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
